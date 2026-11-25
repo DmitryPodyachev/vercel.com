@@ -5,6 +5,8 @@ The same small backend in several languages, as Vercel Functions (zero config):
 | Language | File | URL |
 |---|---|---|
 | Python | `api/py.py` (class `handler`, BaseHTTPRequestHandler) | `/api/py` |
+| Python | `api/pysys.py` – system info + benchmark (JSON) | `/api/pysys`, `?bench=1` |
+| Go | `api/gosys.go` (`func Sysinfo`) – same | `/api/gosys`, `?bench=1` |
 | Go | `api/go.go` (`func Handler`, package `handler`, `go.mod` in root) | `/api/go` |
 
 Each endpoint:
@@ -16,6 +18,9 @@ Each endpoint:
   in the runtime (on Vercel they usually do not – values are read natively instead).
 
 The request text is never executed, only escaped and echoed; commands run with fixed arguments only.
+
+`system.html` shows both side by side and runs the same benchmark in the browser (JS) for comparison:
+SHA-256 over 128 MB, prime sieve to 2 000 000, 256 MB memory alloc+copy, 64 MB write/read in `/tmp` (server only).
 
 ## Deploy
 vercel.com → Add New → Project → import `DmitryPodyachev/vercel.com` → Framework preset **Other** → Deploy.
