@@ -1,0 +1,15 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Backend test</title>
+<link rel="stylesheet" href="/style.css"></head><body>
+<h1>Тест backend на Vercel</h1>
+<p>Одна и та же задача на разных языках: форма с текстом, ответ сервера, свободное место на диске (df), loadavg, сетевые интерфейсы (ifconfig).</p>
+<div class="cards">
+ <div class="card"><h2>🐍 Python</h2><p><a href="/api/py">/api/py</a> · <a href="/api/py?format=json">JSON</a></p>
+  <form method="post" action="/api/py"><input name="text" placeholder="Текст"><button>→</button></form></div>
+ <div class="card"><h2>🐹 Go</h2><p><a href="/api/go">/api/go</a> · <a href="/api/go?format=json">JSON</a></p>
+  <form method="post" action="/api/go"><input name="text" placeholder="Текст"><button>→</button></form></div>
+</div>
+<h2>JSON API</h2>
+<pre>curl -s https://&lt;project&gt;.vercel.app/api/py?format=json
+curl -s -X POST -H 'Content-Type: application/json' -d '{"text":"привет"}' https://&lt;project&gt;.vercel.app/api/go</pre>
+</body></html>
