@@ -284,6 +284,14 @@ def bhf(method, path, body=None, ctype="application/json"):
             return e.code, {"error": str(e)}
 
 
+def public(job):
+    """Never echo the user text / internal fields of a job."""
+    j = {k: v for k, v in (job or {}).items() if k not in ("text", "ip_country")}
+    if isinstance(j.get("artifact"), dict):
+        j["artifact"] = {k: j["artifact"].get(k) for k in ("filename", "size")}
+    return j
+
+
 def run_job(job_id):
     if not os.environ.get("BHF_BUILDER_TOKEN"):
         return 503, {"error": "builder token not configured (env BHF_BUILDER_TOKEN)", "code": "no_token"}
@@ -293,21 +301,22 @@ def run_job(job_id):
     if st != 200:
         return 404 if st == 404 else 502, {"error": f"job lookup failed ({st})", "detail": job.get("error")}
     if job.get("status") == "done":
-        return 200, job
+        return 200, public(job)
     if job.get("status") == "building" and job.get("updated", "") > (
             datetime.datetime.utcnow() - datetime.timedelta(minutes=3)).isoformat():
-        return 409, {"error": "already building", "job": job}
+        return 409, {"error": "already building", "job": public(job)}
     bhf("POST", f"/api/builder/jobs/{job_id}/status", {"status": "building", "message": "vercel"})
     try:
         name, data, info = build(job.get("device"), job.get("firmware"), job.get("text", ""), job_id)
     except Exception as e:  # noqa: BLE001 – report any build error to the job
         msg = str(e)[-480:]
         st, j = bhf("POST", f"/api/builder/jobs/{job_id}/status", {"status": "failed", "message": msg})
-        return 200, j if st == 200 else {"status": "failed", "message": msg}
+        return 200, public(j) if st == 200 else {"status": "failed", "message": msg}
     st, j = bhf("PUT", f"/api/builder/jobs/{job_id}/artifact?filename={name}", data, "application/zip")
     if st != 200:
         bhf("POST", f"/api/builder/jobs/{job_id}/status", {"status": "failed", "message": f"upload failed ({st})"})
         return 502, {"error": f"upload failed ({st})", "detail": j.get("error")}
+    j = public(j)
     j["build"] = info
     return 200, j
 
