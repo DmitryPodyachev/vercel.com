@@ -6,6 +6,13 @@ downloaded once per function instance into `/tmp` (only the parts needed for ATm
 per instance, then a build takes ~0.1–1 s. Result: zip with `<board>-<firmware>.hex`, `FLASH.txt` (avrdude commands for
 Windows / macOS / Ubuntu) and the sketch source. The user text is embedded as a byte array (never as code).
 
+Boards: `arduino_uno`, `arduino_nano` (compiled per job, as above);
+`rpi_pico` (.uf2), `esp8266` (ESP-12E/F, .bin at 0x0), `esp32_cam` (app .bin at 0x10000 + bootloader/partitions/boot_app0):
+**template firmware** – `templates/src/bhf_template/bhf_template.ino` compiled once with arduino-cli (`templates/build.sh`,
+binaries committed in `templates/`); a build only patches the `BhfCfg` block (magic `BHFCFG01`: pin, interval, signature,
+job id, message ≤16 KB UTF-8) and recomputes the image checksums (ESP32: XOR checksum + SHA-256; ESP8266: XOR checksum +
+eboot CRC-32/MPEG-2; UF2: none) → ~10 ms per build. `rpi_zero`: Python program + systemd unit + install.sh.
+
 | | |
 |---|---|
 | `GET /api/build` | state |
