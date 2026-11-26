@@ -204,7 +204,7 @@ void printMessage() {{
 void setup() {{
   pinMode(LED_PIN, OUTPUT);
   Serial.begin({BAUD});
-  Serial.println(F("bhf {firmware}: LED pin {pin} toggles every {fw['ms']} ms"));
+  Serial.println(F("bhf {firmware} job {job_id or '-'}: LED pin {pin} toggles every {fw['ms']} ms"));
   printMessage();{sig_call}
 }}
 
