@@ -1,16 +1,25 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Backend test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Firmware builder</title>
 <link rel="stylesheet" href="/style.css"></head><body>
-<h1>Тест backend на Vercel</h1>
-<p>Одна и та же задача на разных языках: форма с текстом, ответ сервера, свободное место на диске (df), loadavg, сетевые интерфейсы (ifconfig).</p>
-<div class="cards">
- <div class="card"><h2>🐍 Python</h2><p><a href="/api/py">/api/py</a> · <a href="/api/py?format=json">JSON</a></p>
-  <form method="post" action="/api/py"><input name="text" placeholder="Текст"><button>→</button></form></div>
- <div class="card"><h2>🐹 Go</h2><p><a href="/api/go">/api/go</a> · <a href="/api/go?format=json">JSON</a></p>
-  <form method="post" action="/api/go"><input name="text" placeholder="Текст"><button>→</button></form></div>
-</div>
-<p><a href="/system.html"><b>🖥 System info и benchmark</b></a>: CPU, GPU, RAM, диск и сравнение скорости Python / Go / браузер</p>
-<h2>JSON API</h2>
-<pre>curl -s https://&lt;project&gt;.vercel.app/api/py?format=json
-curl -s -X POST -H 'Content-Type: application/json' -d '{"text":"привет"}' https://&lt;project&gt;.vercel.app/api/go</pre>
+<h1>bhf firmware builder</h1>
+<p>Backend сборки прошивок для <a href="https://bhf.pp.ua/">bhf.pp.ua</a>: компилирует скетч Arduino (avr-gcc, ArduinoCore-avr 1.8.6) и отдаёт zip с .hex, исходником и инструкцией по прошивке для Windows, macOS и Ubuntu.</p>
+<table>
+<tr><th>Платы</th><td>Arduino Uno (ATmega328P)</td></tr>
+<tr><th>Прошивки</th><td>Blink LED: светодиод переключается раз в 2 с; Blink LED fast: раз в 0,5 с. Сообщение выводится в Serial (115200 бод).</td></tr>
+<tr><th>Состояние</th><td id="st">…</td></tr>
+</table>
+<h2>API</h2>
+<pre>GET  /api/build                                   состояние сборщика
+POST /api/build {"id":"&lt;job id&gt;"}                  собрать задание из очереди bhf.pp.ua, zip в R2
+POST /api/build {"device":"arduino_uno","firmware":"blink","text":"Hello"}   zip сразу в ответе</pre>
+<pre>curl -s -X POST https://odesa2027.vercel.app/api/build -H 'content-type: application/json' \
+  -d '{"device":"arduino_uno","firmware":"blink_fast","text":"Hello"}' -o fw.zip</pre>
+<p><a href="/test/">Тест backend (Python, Go, system info, benchmark) →</a></p>
+<script>
+fetch("/api/build").then(r => r.json()).then(d => {
+  const t = d.toolchain || {};
+  document.getElementById("st").textContent = "работает · очередь bhf: " + (d.job_mode ? "подключена" : "нет токена (только прямая сборка)") +
+    " · toolchain: " + (t.source || "ещё не загружен на этом экземпляре") + " · сборок на экземпляре: " + (t.builds || 0);
+}).catch(e => document.getElementById("st").textContent = "ошибка: " + e.message);
+</script>
 </body></html>

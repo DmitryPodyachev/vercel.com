@@ -118,7 +118,7 @@ def page(result, i):
     return f"""<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Python backend</title>
 <link rel="stylesheet" href="/style.css"></head><body>
-<p><a href="/">← все backend</a> · <a href="/api/go">Go</a> · <a href="?format=json">JSON</a></p>
+<p><a href="/test/">← все backend</a> · <a href="/api/go">Go</a> · <a href="?format=json">JSON</a></p>
 <h1>🐍 {e(i['runtime'])}</h1>
 <form method="post"><input name="text" maxlength="{MAX_TEXT}" placeholder="Введите текст" autofocus>
 <button>Отправить</button></form>

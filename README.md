@@ -1,4 +1,20 @@
-# Backend test on Vercel
+# bhf firmware builder + backend tests on Vercel
+
+## Firmware builder – `api/build.py`
+Builds Arduino firmware for [bhf.pp.ua](https://bhf.pp.ua) (repo dpodyachev/bhf): official Arduino avr-gcc 7.3 + ArduinoCore-avr 1.8.6,
+downloaded once per function instance into `/tmp` (only the parts needed for ATmega328P, ~85 MB, ~8 s cold), core compiled once
+per instance, then a build takes ~0.1–1 s. Result: zip with `<board>-<firmware>.hex`, `FLASH.txt` (avrdude commands for
+Windows / macOS / Ubuntu) and the sketch source. The user text is embedded as a byte array (never as code).
+
+| | |
+|---|---|
+| `GET /api/build` | state |
+| `POST /api/build {"id"}` | job from the bhf queue: `GET bhf/api/builder/jobs/<id>` → build → `PUT …/artifact` (R2). Needs env **`BHF_BUILDER_TOKEN`** (= Pages secret `VERCEL_BUILDER_TOKEN` of project bhf); optional `BHF_URL` (default https://bhf.pp.ua) |
+| `POST /api/build {"device","firmware","text"}` | direct: zip in the response (CORS for bhf.pp.ua) |
+
+Boards: `arduino_uno`. Firmware: `blink` (LED toggles every 2 s), `blink_fast` (0.5 s); text ≤ 4000 chars → Serial at 115200 baud.
+
+## Backend tests (`/test/`)
 
 The same small backend in several languages, as Vercel Functions (zero config):
 
@@ -19,12 +35,12 @@ Each endpoint:
 
 The request text is never executed, only escaped and echoed; commands run with fixed arguments only.
 
-`system.html` shows both side by side and runs the same benchmark in the browser (JS) for comparison:
+`test/system.html` shows both side by side and runs the same benchmark in the browser (JS) for comparison:
 SHA-256 over 128 MB, prime sieve to 2 000 000, 256 MB memory alloc+copy, 64 MB write/read in `/tmp` (server only).
 
 ## Deploy
 vercel.com → Add New → Project → import `DmitryPodyachev/vercel.com` → Framework preset **Other** → Deploy.
-Every push to `main` redeploys. `index.html` at the root is the start page.
+Every push to `main` redeploys. `index.html` = builder page, `test/` = language tests.
 
 ## Local test
 - Python: `python3 api/py.py` → http://127.0.0.1:8000/

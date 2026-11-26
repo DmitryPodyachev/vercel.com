@@ -163,7 +163,7 @@ func process(t string) *Result {
 var page = template.Must(template.New("p").Parse(`<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Go backend</title>
 <link rel="stylesheet" href="/style.css"></head><body>
-<p><a href="/">← все backend</a> · <a href="/api/py">Python</a> · <a href="?format=json">JSON</a></p>
+<p><a href="/test/">← все backend</a> · <a href="/api/py">Python</a> · <a href="?format=json">JSON</a></p>
 <h1>🐹 {{.I.Runtime}}</h1>
 <form method="post"><input name="text" maxlength="2000" placeholder="Введите текст" autofocus>
 <button>Отправить</button></form>
